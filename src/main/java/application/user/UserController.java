@@ -23,9 +23,9 @@ public class UserController extends BaseController {
     UserRepository userRepository;
 
     @RequestMapping(value = "/api/user")
-    public ResponseEntity<PaceUser> getUser(@RequestParam(value = "facebookId", required = false) String facebookId) {
-        if (facebookId != null) {
-            return new ResponseEntity<>(getPaceUser(facebookId), HttpStatus.OK);
+    public ResponseEntity<PaceUser> getUser(@RequestParam(value = "email", required = false) String email) {
+        if (email != null) {
+            return new ResponseEntity<>(getPaceUser(email), HttpStatus.OK);
         }
         return new ResponseEntity<>(new PaceUser(), HttpStatus.OK);
     }
@@ -39,6 +39,21 @@ public class UserController extends BaseController {
         }
 
         return new ResponseEntity<>(new PaceUser(), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/api/logout", method = RequestMethod.POST)
+    public HttpStatus logout(@RequestBody String userEmail) {
+        if (userEmail != null) {
+            try {
+                UserEmail userEmailAsString = mapFromJson(userEmail, UserEmail.class);
+                PaceUser currentPaceUser = getCurrentlyLoggedInUser(userEmailAsString.getUserEmail());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return HttpStatus.OK;
+        }
+
+        return HttpStatus.OK;
     }
 
     private PaceUser handlePaceUserSaving(@RequestBody String updatedPaceUser, PaceUser currentPaceUser) {
@@ -64,12 +79,23 @@ public class UserController extends BaseController {
     private PaceUser getCurrentPaceUserFromJson(@RequestBody String updatedPaceUser) {
         PaceUser currentPaceUser = null;
         try {
-            currentPaceUser = userRepository.findByFacebookId(mapFromJson(updatedPaceUser, PaceUser.class)
-                    .getFacebookId());
+            currentPaceUser = userRepository.findByEmail(mapFromJson(updatedPaceUser, PaceUser.class)
+                    .getEmail());
         } catch (IOException e) {
             e.printStackTrace();
         }
         return currentPaceUser;
+    }
+
+    private PaceUser getCurrentlyLoggedInUser(@RequestBody String userEmail) {
+        PaceUser currentPaceUser;
+        currentPaceUser = userRepository.findByEmail(userEmail);
+
+        currentPaceUser.setAuthResponse("unknown");
+
+        PaceUser updatedPaceUser = userRepository.save(currentPaceUser);
+
+        return updatedPaceUser;
     }
 
     @RequestMapping("/api/users")
@@ -77,8 +103,8 @@ public class UserController extends BaseController {
         return userRepository.findAll();
     }
 
-    private PaceUser getPaceUser(@RequestParam(value = "facebookId") String facebookId) {
-        return userRepository.findByFacebookId(facebookId);
+    private PaceUser getPaceUser(@RequestParam(value = "email") String email) {
+        return userRepository.findByEmail(email);
     }
 
     private <T> T mapFromJson(String json, Class<T> clazz) throws JsonParseException, JsonMappingException,

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="2696828919">
-    <data-source source="LOCAL" name="PostgreSQL - backpacedb1@localhost" uuid="906a6f42-f16a-4156-8368-ff7c9393e542">
+  <component name="DataSourceManagerImpl" format="xml" hash="1210423209">
+    <data-source source="LOCAL" name="PostgreSQL - postgres@10.224.23.19" uuid="906a6f42-f16a-4156-8368-ff7c9393e542">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/backpacedb1</jdbc-url>
+      <jdbc-url>jdbc:postgresql://10.224.23.19:5432/postgres</jdbc-url>
     </data-source>
   </component>
 </project>

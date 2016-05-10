@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface UserRepository extends CrudRepository<PaceUser, Long> {
 
-    PaceUser findByFacebookId(String lastName);
+    PaceUser findByEmail(String lastName);
 
 }

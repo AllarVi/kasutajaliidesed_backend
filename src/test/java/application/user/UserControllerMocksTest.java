@@ -73,8 +73,9 @@ public class UserControllerMocksTest extends AbstractControllerTest {
 
     private PaceUser getPaceUserAuthSuccess() {
         PaceUser paceUserAuthSuccess = new PaceUser();
-        paceUserAuthSuccess.setName("William Wallace");
-        paceUserAuthSuccess.setFacebookId("123451234512345");
+        paceUserAuthSuccess.setEmail("paul@hot.ee");
+        paceUserAuthSuccess.setPassword("paul");
+        paceUserAuthSuccess.setRole("teacher");
         paceUserAuthSuccess.setAuthResponse("success");
         return paceUserAuthSuccess;
     }
@@ -170,7 +171,7 @@ public class UserControllerMocksTest extends AbstractControllerTest {
 
         Assert.assertNotNull("failure - expected entity not null", createdEntity);
         Assert.assertNotNull("failure - expected id attribute not null", createdEntity.getId());
-        Assert.assertEquals("failure - expected text attribute match", entity.getName(), createdEntity.getName());
+        Assert.assertEquals("failure - expected text attribute match", entity.getEmail(), createdEntity.getEmail());
     }
 
     @Test
