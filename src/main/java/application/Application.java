@@ -69,6 +69,15 @@ public class Application {
             // save a couple of customers
             repository.save(new PaceUser("Allar", "1273703759309879"));
 
+            PaceUser teacherAdmin = new PaceUser();
+            teacherAdmin.setAuthResponse("unknown");
+            teacherAdmin.setEmail("teacher@mail.ee");
+            teacherAdmin.setPassword("teacher");
+            teacherAdmin.setRole("teacher");
+
+            repository.save(teacherAdmin);
+
+
             // fetch all customers
             log.info("Users found with findAll():");
             log.info("-------------------------------");

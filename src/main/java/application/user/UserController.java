@@ -25,15 +25,18 @@ public class UserController extends BaseController {
     @RequestMapping(value = "/api/user")
     public ResponseEntity<PaceUser> getUser(@RequestParam(value = "email", required = false) String email) {
         if (email != null) {
-            return new ResponseEntity<>(getPaceUser(email), HttpStatus.OK);
+            return new ResponseEntity<>(getUserFromDB(email), HttpStatus.OK);
         }
         return new ResponseEntity<>(new PaceUser(), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/api/user", method = RequestMethod.POST)
-    public ResponseEntity<PaceUser> saveNewPaceUser(@RequestBody String updatedPaceUser) {
+    public ResponseEntity<PaceUser> register(@RequestBody String updatedPaceUser) {
         if (updatedPaceUser != null) {
             PaceUser currentPaceUser = getCurrentPaceUserFromJson(updatedPaceUser);
+            if (currentPaceUser != null) {
+                return new ResponseEntity<>(new PaceUser(), HttpStatus.OK);
+            }
             PaceUser returnedPaceUser = handlePaceUserSaving(updatedPaceUser, currentPaceUser);
             return new ResponseEntity<>(returnedPaceUser, HttpStatus.CREATED);
         }
@@ -56,6 +59,28 @@ public class UserController extends BaseController {
         return HttpStatus.OK;
     }
 
+    @RequestMapping(value = "/api/login", method = RequestMethod.POST)
+    public ResponseEntity<PaceUser> login(@RequestBody String loginDataAsString) {
+        if (loginDataAsString != null) {
+            try {
+                LoginData loginData = mapFromJson(loginDataAsString, LoginData.class);
+                PaceUser currentPaceUser = getUserFromDB(loginData.getEmail());
+
+                if (currentPaceUser != null) {
+                    if (currentPaceUser.getPassword().equals(loginData.getPassword())) {
+                        currentPaceUser.setAuthResponse("success");
+
+                        PaceUser updatedPaceUser = userRepository.save(currentPaceUser);
+                        return new ResponseEntity<>(updatedPaceUser, HttpStatus.OK);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return new ResponseEntity<>(new PaceUser(), HttpStatus.OK);
+    }
+
     private PaceUser handlePaceUserSaving(@RequestBody String updatedPaceUser, PaceUser currentPaceUser) {
         PaceUser updatedPaceUserAsObject = getUpdatedPaceUserAsObject(updatedPaceUser);
 
@@ -63,6 +88,7 @@ public class UserController extends BaseController {
             updatedPaceUserAsObject.setId(currentPaceUser.getId());
         }
 
+        updatedPaceUserAsObject.setRole("student");
         return userRepository.save(updatedPaceUserAsObject);
     }
 
@@ -79,17 +105,16 @@ public class UserController extends BaseController {
     private PaceUser getCurrentPaceUserFromJson(@RequestBody String updatedPaceUser) {
         PaceUser currentPaceUser = null;
         try {
-            currentPaceUser = userRepository.findByEmail(mapFromJson(updatedPaceUser, PaceUser.class)
-                    .getEmail());
-        } catch (IOException e) {
+            String email = mapFromJson(updatedPaceUser, PaceUser.class).getEmail();
+            currentPaceUser = userRepository.findByEmail(email);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return currentPaceUser;
     }
 
-    private PaceUser getCurrentlyLoggedInUser(@RequestBody String userEmail) {
-        PaceUser currentPaceUser;
-        currentPaceUser = userRepository.findByEmail(userEmail);
+    private PaceUser getCurrentlyLoggedInUser(String userEmail) {
+        PaceUser currentPaceUser = userRepository.findByEmail(userEmail);
 
         currentPaceUser.setAuthResponse("unknown");
 
@@ -103,8 +128,12 @@ public class UserController extends BaseController {
         return userRepository.findAll();
     }
 
-    private PaceUser getPaceUser(@RequestParam(value = "email") String email) {
-        return userRepository.findByEmail(email);
+    private PaceUser getUserFromDB(@RequestParam(value = "email") String email) {
+        try {
+            return userRepository.findByEmail(email);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private <T> T mapFromJson(String json, Class<T> clazz) throws JsonParseException, JsonMappingException,

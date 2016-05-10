@@ -26,7 +26,7 @@ public class PaceUser {
 
     private String role;
 
-    protected PaceUser() {
+    public PaceUser() {
     }
 
     public PaceUser(String name, String facebookId) {
